@@ -12,7 +12,6 @@ costR = eye(m);
 Count = 2000;
 change_log = zeros(Count, 2);
 K_log = zeros(m, n, Count);
-k_log = zeros(m,    Count);
 
 for i = 1:Count
 Qx = g_Qx(Vxx, Vx, costQ, costR, x, u);
@@ -26,8 +25,7 @@ Vxx_next = Qxx - Qux' * pinv(Quu) * Qux;
 
 change_log(i, :) = [norm(Vxx_next - Vxx), norm(Vx_next - Vx)];
 
-K_log(:, :, i) = pinv(Quu) * Qux;
-k_log(:,    i) = pinv(Quu) * Qu';
+    K_log(:, :, i) = K;
 
 Vx = Vx_next;
 Vxx = Vxx_next;
@@ -36,6 +34,8 @@ end
 figure()
 subplot(1, 2, 1); semilogy(change_log)
 
+K = pinv(Quu) * Qux
+eig(g_A(x, u) - g_B(x, u)*K)
 
 x_log = zeros(Count, n);
 x = 0.01*randn(n, 1);
@@ -43,9 +43,10 @@ for i = 1:Count
     x_log(i, :) = x;
     
     K = K_log(:, :, Count - i + 1);
-    k = k_log(:,    Count - i + 1);
+    k = K_log(:, :, Count - i + 1);
     
-    x = g_f(x, -K*x - k);
+    
+    x = g_f(x, -K*x);
 end
 subplot(1, 2, 2)
 plot(x_log)

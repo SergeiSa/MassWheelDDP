@@ -44,7 +44,6 @@ description = SRD_generate_dynamics_generalized_coordinates_model(...
 Handler_dynamics_generalized_coordinates_model = SRD_get_handler__dynamics_generalized_coordinates_model('description', description);
 SRD_save(Handler_dynamics_generalized_coordinates_model, 'Handler_dynamics_generalized_coordinates_model');
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 dof = Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
@@ -61,37 +60,22 @@ dx = [SymbolicEngine.v;
 dx = subs(dx, SymbolicEngine.q, x(1:dof));  
 dx = subs(dx, SymbolicEngine.v, x((dof+1):end));  
 
+
+% double(subs(H \ c, SymbolicEngine.q(1), 0))
+% dx_0 = subs(dx,   x, zeros(size(x)));  
+% dx_0 = subs(dx_0, u, zeros(size(u)));
+% dx_0 = double(dx_0)
+
 dt = 0.001;
 next_x = x + dx*dt;
 
-
-%%%%%%%%%%%%%%%%%%%%%%%
-   
-  
-P = sym('P', [n, n]); assume(P, 'real');
-p = sym('p', [1, n]); assume(p, 'real');
-
-costQ = sym('Q', [n, n]); assume(costQ, 'real');
-costR = sym('R', [m, m]); assume(costR, 'real');
-
-HJB_Q = x' * costQ * x + u' * costR * u + ...
-    -0.5*next_x' * P * next_x + p * next_x;
-
-HJB_Q = simplify(HJB_Q);
-% vpa(HJB_Q, 3)
-
-Qx  = simplify(jacobian(HJB_Q, x));
-Qu  = simplify(jacobian(HJB_Q, u));
-Quu = simplify(jacobian(Qu,    u));
-Qux = simplify(jacobian(Qu,    x));
-Qxx = simplify(jacobian(Qx,    x));
+A = simplify(jacobian(next_x, x))
+B = simplify(jacobian(next_x, u))
 
 
-matlabFunction(Qx,  'File','g_Qx',   'Vars', {P, p, costQ, costR, x, u});
-matlabFunction(Qu,  'File','g_Qu',   'Vars', {P, p, costQ, costR, x, u});
-matlabFunction(Quu, 'File','g_Quu',  'Vars', {P, p, costQ, costR, x, u});
-matlabFunction(Qux, 'File','g_Qux',  'Vars', {P, p, costQ, costR, x, u});
-matlabFunction(Qxx, 'File','g_Qxx',  'Vars', {P, p, costQ, costR, x, u});
+matlabFunction(next_x,  'File','g_f',   'Vars', {x, u});
+matlabFunction(A,  'File','g_A',   'Vars', {x, u});
+matlabFunction(B,  'File','g_B',   'Vars', {x, u});
 
 
 

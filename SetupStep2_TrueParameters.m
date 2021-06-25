@@ -53,6 +53,7 @@ SRD_save(LinkArray, 'LinkArray');
 
 % InitialPosition = [0, 0, pi/10, -pi/10-2*pi/30]; %Define initial position of the robot
 InitialPosition = [pi, -pi/2]; %Define initial position of the robot
+InitialPosition = [0, -pi/2]; %Define initial position of the robot
 SRD_save(InitialPosition, 'InitialPosition');
 
 Chain = SRD_Chain(LinkArray);
